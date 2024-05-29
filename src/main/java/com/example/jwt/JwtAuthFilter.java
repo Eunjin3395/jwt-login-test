@@ -1,9 +1,7 @@
 package com.example.jwt;
 
 
-import com.example.domain.RoleType;
 import com.example.springSecurity.CustomUserDetailsService;
-import com.example.domain.LoginType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -29,30 +28,27 @@ public class JwtAuthFilter extends OncePerRequestFilter { // OncePerRequestFilte
      * JWT 토큰 검증 필터 수행
      */
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authorizationHeader = request.getHeader("Authorization");
+        HttpServletRequest httpServletRequest = request;
+        String jwt = jwtUtil.resolveToken(httpServletRequest); // request header에서 jwt토큰 값만을 추출, 토큰 값이 빈 상태로 요청 온 경우 null
 
-        //JWT가 헤더에 있는 경우
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            //JWT 유효성 검증
-            if (jwtUtil.validateToken(token)) {
-                Long memberId = jwtUtil.getMemberId(token);
-                Long socialId = jwtUtil.getSocialId(token);
+        if (StringUtils.hasText(jwt)
+                && jwtUtil.validateToken(jwt)) {
+            Long memberId = jwtUtil.getMemberId(jwt);
+            Long socialId = jwtUtil.getSocialId(jwt);
 
-                //유저와 토큰 일치 시 userDetails 생성
-                UserDetails userDetails = customUserDetailsService.loadUserByMemberIdAndSocialId(memberId,socialId);
+            //유저와 토큰 일치 시 userDetails 생성
+            UserDetails userDetails = customUserDetailsService.loadUserByMemberIdAndSocialId(memberId, socialId);
+            //UserDetsils, Password, Role -> 접근권한 인증 Token 생성
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-                if (userDetails != null) {
-                    //UserDetsils, Password, Role -> 접근권한 인증 Token 생성
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                    //현재 Request의 Security Context에 접근권한 설정
-                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                }
-            }
+            //현재 Request의 Security Context에 접근권한 설정
+            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        } else {
+            
+            SecurityContextHolder.getContext().setAuthentication(null);
         }
-
-        filterChain.doFilter(request, response); // 다음 필터로 넘기기
+        filterChain.doFilter(httpServletRequest, response);
     }
+
 }

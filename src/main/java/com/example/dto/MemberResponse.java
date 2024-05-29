@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 
 public class MemberResponse {
 
@@ -16,8 +14,7 @@ public class MemberResponse {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class JwtDto{
-        String grantType;
+    public static class JwtDto {
         String accessToken;
         String refreshToken;
 
@@ -28,7 +25,7 @@ public class MemberResponse {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class myInfoDto{
+    public static class myInfoDto {
         Long socialId;
         String name;
         String email;

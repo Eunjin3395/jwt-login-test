@@ -1,5 +1,7 @@
 package com.example;
 
+import com.example.apiPayload.code.status.ErrorStatus;
+import com.example.apiPayload.exception.GeneralException;
 import com.example.domain.LoginType;
 import com.example.domain.Member;
 import com.example.dto.MemberRequest;
@@ -22,18 +24,18 @@ public class AuthService {
     public String login(MemberRequest.loginRequest request) {
         log.info("Request ID: {}, Login Type: {}", request.getId(), request.getLoginType());
         Long socialId = request.getId();
-        String  requestLoginType = request.getLoginType();
+        String requestLoginType = request.getLoginType();
         LoginType loginType = null;
 
         if (requestLoginType.equals(LoginType.KAKAO.toString())) {
             loginType = LoginType.KAKAO;
         } else if (requestLoginType.equals(LoginType.APPLE.toString())) {
             loginType = LoginType.APPLE;
-        }else{
+        } else {
             throw new RuntimeException("Invalid LoginType");
         }
 
-        Member member = memberRepository.findBySocialIdAndLoginType(socialId, loginType).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        Member member = memberRepository.findBySocialIdAndLoginType(socialId, loginType).orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         String accessToken = jwtUtil.createAccessToken(member.getId(), member.getSocialId(), member.getRoleType());
         return accessToken;

@@ -21,5 +21,5 @@ springdoc:
 
 jwt:
   secret: secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret
-  access_expiration_time: 86400000
+  access_expiration_time: 60000
 

@@ -1,16 +1,18 @@
 package com.example.jwt;
 
-import com.example.domain.LoginType;
+import com.example.apiPayload.code.status.ErrorStatus;
+import com.example.apiPayload.exception.JwtAuthenticationException;
 import com.example.domain.RoleType;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.security.Key;
-import java.time.ZonedDateTime;
 import java.util.Date;
 
 /**
@@ -22,6 +24,8 @@ public class JwtUtil {
 
     private final Key key;
     private final long accessTokenExpTime;
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+
 
     public JwtUtil(
             @Value("${jwt.secret}") String secretKey,
@@ -33,7 +37,6 @@ public class JwtUtil {
     }
 
     /**
-     *
      * @param memberId
      * @param socialId
      * @param roleType
@@ -44,21 +47,20 @@ public class JwtUtil {
     }
 
 
-
-    private String createToken( Long memberId, Long socialId, RoleType roleType, Long expireTime) {
+    private String createToken(Long memberId, Long socialId, RoleType roleType, Long expireTime) {
         Claims claims = Jwts.claims();
         claims.put("memberId", memberId);
         claims.put("socialId", socialId);
         claims.put("role", roleType.toString());
 
-        ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime tokenValidity = now.plusSeconds(expireTime);
+        long now = (new Date()).getTime();
+        Date validity = new Date(now + this.accessTokenExpTime);
 
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setIssuedAt(Date.from(now.toInstant()))
-                .setExpiration(Date.from(tokenValidity.toInstant()))
+                .setIssuedAt(new Date(now))
+                .setExpiration(validity)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -66,6 +68,7 @@ public class JwtUtil {
 
     /**
      * JWT토큰에서 socialId 추출
+     *
      * @param token
      * @return
      */
@@ -84,9 +87,14 @@ public class JwtUtil {
         return RoleType.valueOf(roleType); // Convert String to LoginType enum
     }
 
+    public long getTokenExpirationTime(String token) {
+        return parseClaims(token).getExpiration().getTime();
+    }
+
 
     /**
      * JWT 검증
+     *
      * @param token
      * @return IsValidate
      */
@@ -96,19 +104,30 @@ public class JwtUtil {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
+            throw new JwtAuthenticationException(ErrorStatus.INVALID_TOKEN_EXCEPTION);
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT Token", e);
+            throw new JwtAuthenticationException(ErrorStatus.EXPIRED_JWT_EXCEPTION);
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT Token", e);
+            throw new JwtAuthenticationException(ErrorStatus.INVALID_TOKEN_EXCEPTION);
         } catch (IllegalArgumentException e) {
             log.info("JWT claims string is empty.", e);
+            throw new JwtAuthenticationException(ErrorStatus.INVALID_TOKEN_EXCEPTION);
         }
-        return false;
     }
 
+    public String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
 
     /**
      * JWT Claims 추출
+     *
      * @param accessToken
      * @return JWT Claims
      */

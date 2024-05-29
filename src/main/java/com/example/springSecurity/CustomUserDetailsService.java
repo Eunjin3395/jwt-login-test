@@ -1,7 +1,6 @@
 package com.example.springSecurity;
 
 import com.example.MemberRepository;
-import com.example.domain.LoginType;
 import com.example.domain.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         Member member = memberRepository.findByIdAndSocialId(memberId, socialId)
                 .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저가 없습니다."));
 
-        return new CustomUserDetails(member.getId(),member.getRoleType());
+        return new CustomUserDetails(member.getId(), member.getSocialId(), member.getLoginType(), member.getRoleType());
     }
 
     @Override

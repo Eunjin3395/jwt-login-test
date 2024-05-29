@@ -3,34 +3,28 @@ package com.example.springSecurity;
 import com.example.domain.RoleType;
 import com.example.jwt.JwtAuthFilter;
 import com.example.jwt.JwtUtil;
-import com.example.springSecurity.CustomAccessDeniedHandler;
-import com.example.springSecurity.CustomUserDetailsService;
-import com.example.springSecurity.EntryPointUnauthorizedHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.web.authentication.*;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig  {
+@RequiredArgsConstructor
+public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
-    private final CustomAccessDeniedHandler accessDeniedHandler;
-    private final EntryPointUnauthorizedHandler unauthorizedHandler;
+    private final CustomAccessDeniedHandler accessDeniedHandler = new CustomAccessDeniedHandler();
+    private final EntryPointUnauthorizedHandler unauthorizedHandler = new EntryPointUnauthorizedHandler();
+    private final JwtAuthenticationExceptionHandler jwtAuthenticationExceptionHandler = new JwtAuthenticationExceptionHandler();
 
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtUtil jwtUtil, CustomAccessDeniedHandler accessDeniedHandler, EntryPointUnauthorizedHandler unauthorizedHandler) {
-        this.customUserDetailsService = customUserDetailsService;
-        this.jwtUtil = jwtUtil;
-        this.accessDeniedHandler = accessDeniedHandler;
-        this.unauthorizedHandler = unauthorizedHandler;
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -43,20 +37,24 @@ public class SecurityConfig  {
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
                         SessionCreationPolicy.STATELESS));
 
-        httpSecurity
-                .exceptionHandling((exceptionHandling) -> exceptionHandling
-                        .accessDeniedHandler(accessDeniedHandler)
-                        .authenticationEntryPoint(unauthorizedHandler))
-                .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         httpSecurity
-                .authorizeHttpRequests((authorizeRequests) -> {
-                    authorizeRequests
-                            .requestMatchers("/api/auth/login").permitAll() // 로그인 엔드포인트를 허용합니다.
-                            .requestMatchers("/api/**").hasAnyRole("MEMBER", "ADMIN")
-                            .requestMatchers("/admin/**").hasRole(RoleType.ADMIN.toString())
-                            .anyRequest().permitAll();
-                });
+                .authorizeHttpRequests(
+                        (authorizeRequests) -> {
+                            authorizeRequests
+                                    .requestMatchers("/api/auth/login").permitAll() // 로그인 엔드포인트를 허용
+                                    .requestMatchers("/api/**").hasAnyRole("MEMBER", "ADMIN")
+                                    .requestMatchers("/admin/**").hasRole(RoleType.ADMIN.toString())
+                                    .anyRequest().authenticated();
+                        })
+                .exceptionHandling(
+                        (exceptionHandling) ->
+                                exceptionHandling
+                                        .accessDeniedHandler(accessDeniedHandler)
+                                        .authenticationEntryPoint(unauthorizedHandler))
+                .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationExceptionHandler, JwtAuthFilter.class);
+
 
         return httpSecurity.build();
     }
