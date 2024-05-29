@@ -20,7 +20,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         Member member = memberRepository.findBySocialIdAndLoginType(socialId, loginType)
                 .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저가 없습니다."));
 
-        return new CustomUserDetails(member.getId(), member.getLoginType(),member.getRoleType());
+        return new CustomUserDetails(member.getId(),member.getRoleType());
     }
 
     @Override

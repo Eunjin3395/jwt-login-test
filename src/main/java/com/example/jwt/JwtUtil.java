@@ -53,8 +53,8 @@ public class JwtUtil {
     private String createToken( Long socialId, LoginType loginType, RoleType roleType, Long expireTime) {
         Claims claims = Jwts.claims();
         claims.put("socialId", socialId);
-        claims.put("loginType", loginType);
-        claims.put("role", roleType);
+        claims.put("loginType", loginType.toString());
+        claims.put("role", roleType.toString());
 
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime tokenValidity = now.plusSeconds(expireTime);
@@ -79,7 +79,10 @@ public class JwtUtil {
     }
 
     public LoginType getLoginType(String token) {
-        return parseClaims(token).get("loginType", LoginType.class);
+
+        Claims claims = parseClaims(token);
+        String loginTypeStr = claims.get("loginType", String.class); // Retrieve as String
+        return LoginType.valueOf(loginTypeStr); // Convert String to LoginType enum
     }
 
 

@@ -14,21 +14,15 @@ import java.util.stream.Collectors;
 public class CustomUserDetails implements UserDetails {
 
     Long memberId;
-    LoginType loginType;
     RoleType roleType;
 
-    public CustomUserDetails(Long memberId, LoginType loginType, RoleType roleType) {
+    public CustomUserDetails(Long memberId, RoleType roleType) {
         this.memberId = memberId;
-        this.loginType = loginType;
         this.roleType = roleType;
     }
 
     public Long getMemberId() {
         return memberId;
-    }
-
-    public LoginType getLoginType() {
-        return loginType;
     }
 
     public RoleType getRoleType() {

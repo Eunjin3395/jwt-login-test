@@ -53,7 +53,7 @@ public class SecurityConfig  {
                 .authorizeHttpRequests((authorizeRequests) -> {
                     authorizeRequests
                             .requestMatchers("/api/auth/login").permitAll() // 로그인 엔드포인트를 허용합니다.
-                            .requestMatchers("/api/auth/**").hasAnyRole("MEMBER", "ADMIN")
+                            .requestMatchers("/api/**").hasAnyRole("MEMBER", "ADMIN")
                             .requestMatchers("/admin/**").hasRole(RoleType.ADMIN.toString())
                             .anyRequest().permitAll();
                 });
