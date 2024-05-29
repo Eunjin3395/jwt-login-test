@@ -16,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomUserDetailsService implements UserDetailsService {
     private final MemberRepository memberRepository;
 
-    public UserDetails loadUserBySocialIdAndLoginType(Long socialId, LoginType loginType) throws UsernameNotFoundException {
-        Member member = memberRepository.findBySocialIdAndLoginType(socialId, loginType)
+    public UserDetails loadUserByMemberIdAndSocialId(Long memberId, Long socialId) throws UsernameNotFoundException {
+        Member member = memberRepository.findByIdAndSocialId(memberId, socialId)
                 .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저가 없습니다."));
 
         return new CustomUserDetails(member.getId(),member.getRoleType());
@@ -25,6 +25,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        throw new UnsupportedOperationException("loadUserByUsername(String username) is not supported. Use loadUserBySocialIdAndLoginType(Long socialId, LoginType loginType) instead.");
+        throw new UnsupportedOperationException("loadUserByUsername(String username) is not supported. Use loadUserByMemberIdAndSocialId(Long socialId, LoginType loginType) instead.");
     }
 }

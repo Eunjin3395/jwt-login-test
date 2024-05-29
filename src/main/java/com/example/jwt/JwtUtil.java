@@ -33,27 +33,22 @@ public class JwtUtil {
     }
 
     /**
-     * Access Token 생성
-     * @param member
-     * @return Access Token String
+     *
+     * @param memberId
+     * @param socialId
+     * @param roleType
+     * @return
      */
-    public String createAccessToken(Long socialId, LoginType loginType, RoleType roleType) {
-        return createToken(socialId,loginType, roleType,accessTokenExpTime);
+    public String createAccessToken(Long memberId, Long socialId, RoleType roleType) {
+        return createToken(memberId, socialId, roleType, accessTokenExpTime);
     }
 
 
-    /**
-     * JWT 토큰 생성
-     * @param socialId
-     * @param loginType
-     * @param email
-     * @param expireTime
-     * @return JWT String
-     */
-    private String createToken( Long socialId, LoginType loginType, RoleType roleType, Long expireTime) {
+
+    private String createToken( Long memberId, Long socialId, RoleType roleType, Long expireTime) {
         Claims claims = Jwts.claims();
+        claims.put("memberId", memberId);
         claims.put("socialId", socialId);
-        claims.put("loginType", loginType.toString());
         claims.put("role", roleType.toString());
 
         ZonedDateTime now = ZonedDateTime.now();
@@ -74,15 +69,19 @@ public class JwtUtil {
      * @param token
      * @return
      */
+    public Long getMemberId(String token) {
+        return parseClaims(token).get("memberId", Long.class);
+    }
+
     public Long getSocialId(String token) {
         return parseClaims(token).get("socialId", Long.class);
     }
 
-    public LoginType getLoginType(String token) {
+    public RoleType getRoleType(String token) {
 
         Claims claims = parseClaims(token);
-        String loginTypeStr = claims.get("loginType", String.class); // Retrieve as String
-        return LoginType.valueOf(loginTypeStr); // Convert String to LoginType enum
+        String roleType = claims.get("roleType", String.class); // Retrieve as String
+        return RoleType.valueOf(roleType); // Convert String to LoginType enum
     }
 
 

@@ -35,7 +35,7 @@ public class AuthService {
 
         Member member = memberRepository.findBySocialIdAndLoginType(socialId, loginType).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        String accessToken = jwtUtil.createAccessToken(member.getSocialId(), member.getLoginType(), member.getRoleType());
+        String accessToken = jwtUtil.createAccessToken(member.getId(), member.getSocialId(), member.getRoleType());
         return accessToken;
     }
 }

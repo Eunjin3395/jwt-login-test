@@ -1,6 +1,7 @@
 package com.example.jwt;
 
 
+import com.example.domain.RoleType;
 import com.example.springSecurity.CustomUserDetailsService;
 import com.example.domain.LoginType;
 import jakarta.servlet.FilterChain;
@@ -35,11 +36,11 @@ public class JwtAuthFilter extends OncePerRequestFilter { // OncePerRequestFilte
             String token = authorizationHeader.substring(7);
             //JWT 유효성 검증
             if (jwtUtil.validateToken(token)) {
+                Long memberId = jwtUtil.getMemberId(token);
                 Long socialId = jwtUtil.getSocialId(token);
-                LoginType loginType = jwtUtil.getLoginType(token);
 
                 //유저와 토큰 일치 시 userDetails 생성
-                UserDetails userDetails = customUserDetailsService.loadUserBySocialIdAndLoginType(socialId,loginType);
+                UserDetails userDetails = customUserDetailsService.loadUserByMemberIdAndSocialId(memberId,socialId);
 
                 if (userDetails != null) {
                     //UserDetsils, Password, Role -> 접근권한 인증 Token 생성
