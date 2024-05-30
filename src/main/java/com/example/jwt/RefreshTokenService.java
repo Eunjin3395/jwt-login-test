@@ -65,14 +65,6 @@ public class RefreshTokenService {
         }
     }
 
-    // Method to validate a refresh token
-//    public boolean validateRefreshToken(Long memberId, String token) {
-//        RefreshTokenDetails storedToken = refreshTokenStore.get(memberId);
-//        if (storedToken != null && storedToken.getToken().equals(token) && storedToken.getExpireAt().isAfter(LocalDateTime.now())) {
-//            return true;
-//        }
-//        return false;
-//    }
 
     /**
      * 해당 token db에서 제거

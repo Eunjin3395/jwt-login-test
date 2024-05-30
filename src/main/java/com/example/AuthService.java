@@ -7,6 +7,7 @@ import com.example.domain.Member;
 import com.example.dto.MemberRequest;
 import com.example.dto.MemberResponse;
 import com.example.jwt.JwtUtil;
+import com.example.jwt.RefreshTokenDetails;
 import com.example.jwt.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,4 +69,20 @@ public class AuthService {
         return memberRepository.save(member);
 
     }
+
+    public MemberResponse.reissueDto reissueToken(MemberRequest.reissueRequest request) {
+        String refreshToken = refreshTokenService.reGenerateRefreshToken(request);
+        RefreshTokenDetails refreshTokenDetails = refreshTokenService.getRefreshTokenDetails(refreshToken);
+        Member parsedMember = memberRepository.findById(refreshTokenDetails.getMemberId()).orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        String accessToken = jwtUtil.createAccessToken(parsedMember.getId(), parsedMember.getSocialId(), parsedMember.getRoleType());
+
+        return MemberResponse.reissueDto.builder()
+                .memberId(parsedMember.getId())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .accessTokenExpiresIn(jwtUtil.getTokenExpirationTime(accessToken))
+                .build();
+    }
+
 }

@@ -44,11 +44,12 @@ public class SecurityConfig {
                             authorizeRequests
                                     .requestMatchers("/api/auth/login").permitAll() // 로그인 엔드포인트를 허용
                                     .requestMatchers("/api/auth/signin/{loginType}").permitAll()
+                                    .requestMatchers("/api/auth/reissue").permitAll()
                                     .requestMatchers("/swagger-ui/**").permitAll()
                                     .requestMatchers("/api/**").hasAnyRole("MEMBER", "ADMIN")
                                     .requestMatchers("/admin/**").hasRole(RoleType.ADMIN.toString())
                                     .anyRequest().authenticated();
-
+                            
                         })
                 .exceptionHandling(
                         (exceptionHandling) ->

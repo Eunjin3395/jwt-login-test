@@ -36,4 +36,16 @@ public class MemberResponse {
         LocalDate birth;
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class reissueDto {
+        Long memberId;
+        String accessToken;
+        String refreshToken;
+
+        Long accessTokenExpiresIn;
+    }
+
 }

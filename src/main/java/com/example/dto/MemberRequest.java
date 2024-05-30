@@ -29,4 +29,9 @@ public class MemberRequest {
         String loginType;
     }
 
+    @Getter
+    public static class reissueRequest {
+        String refreshToken;
+    }
+
 }

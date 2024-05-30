@@ -12,7 +12,8 @@ public enum SuccessStatus implements BaseCode {
 
     _OK(HttpStatus.OK, "COMMON200", "성공입니다."),
 
-    JOIN_SUCCESS(HttpStatus.OK, "MEMBER200", "회원가입 성공");
+    JOIN_SUCCESS(HttpStatus.OK, "MEMBER200", "회원가입 성공"),
+    TOKEN_REISSUE_SUCCESS(HttpStatus.OK, "AUTH200", "토큰 재발급 성공");
 
 
     private final HttpStatus httpStatus;
