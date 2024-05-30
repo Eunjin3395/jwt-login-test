@@ -4,6 +4,7 @@ import com.example.apiPayload.code.status.ErrorStatus;
 import com.example.apiPayload.exception.GeneralException;
 import com.example.domain.LoginType;
 import com.example.domain.Member;
+import com.example.dto.MemberRequest;
 import com.example.dto.MemberResponse;
 import com.example.jwt.JwtUtil;
 import com.example.jwt.RefreshTokenService;
@@ -22,6 +23,13 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final RefreshTokenService refreshTokenService;
 
+    /**
+     * member외 socialId와 LoginType String을 받아 access token, refresh token 발급
+     *
+     * @param socialId
+     * @param requestLoginType
+     * @return
+     */
     @Transactional
     public MemberResponse.loginDto login(Long socialId, String requestLoginType) {
         LoginType loginType = null;
@@ -40,9 +48,24 @@ public class AuthService {
         String refreshToken = refreshTokenService.generateRefreshToken(member.getSocialId(), member.getLoginType());
 
         return MemberResponse.loginDto.builder()
+                .memberId(member.getId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .accessTokenExpiresIn(jwtUtil.getTokenExpirationTime(accessToken))
                 .build();
+    }
+
+    @Transactional
+    public Member join(MemberRequest.signinRequest request, String reqLoginType) {
+        LoginType loginType = null;
+        if (reqLoginType.equals(LoginType.KAKAO.toString())) {
+            loginType = LoginType.KAKAO;
+        } else if (reqLoginType.equals(LoginType.APPLE.toString())) {
+            loginType = LoginType.APPLE;
+        }
+
+        Member member = MemberConverter.toMember(request, loginType);
+        return memberRepository.save(member);
+
     }
 }

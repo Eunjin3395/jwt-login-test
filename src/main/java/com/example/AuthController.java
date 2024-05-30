@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final MemberService memberService;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
@@ -31,7 +30,10 @@ public class AuthController {
                                                        @PathVariable(name = "loginType") String loginType
     ) {
 
-        Member member = memberService.join(request, loginType);
+        Member member = authService.join(request, loginType);
         return ApiResponse.of(SuccessStatus.JOIN_SUCCESS, authService.login(member.getSocialId(), member.getLoginType().toString()));
     }
+
+    @PostMapping("/reissue")
+    public ApiResponse
 }

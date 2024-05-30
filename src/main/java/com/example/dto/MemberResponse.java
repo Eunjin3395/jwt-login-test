@@ -15,6 +15,7 @@ public class MemberResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class loginDto {
+        Long memberId;
         String accessToken;
         String refreshToken;
 
