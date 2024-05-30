@@ -4,7 +4,6 @@ import com.example.apiPayload.code.status.ErrorStatus;
 import com.example.apiPayload.exception.GeneralException;
 import com.example.domain.LoginType;
 import com.example.domain.Member;
-import com.example.dto.MemberRequest;
 import com.example.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +20,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public String login(MemberRequest.loginRequest request) {
-        log.info("Request ID: {}, Login Type: {}", request.getId(), request.getLoginType());
-        Long socialId = request.getId();
-        String requestLoginType = request.getLoginType();
+    public String login(Long socialId, String requestLoginType) {
         LoginType loginType = null;
 
         if (requestLoginType.equals(LoginType.KAKAO.toString())) {

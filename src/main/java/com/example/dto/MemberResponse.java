@@ -34,4 +34,5 @@ public class MemberResponse {
         String gender;
         LocalDate birth;
     }
+
 }
