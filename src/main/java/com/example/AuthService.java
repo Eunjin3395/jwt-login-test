@@ -4,7 +4,9 @@ import com.example.apiPayload.code.status.ErrorStatus;
 import com.example.apiPayload.exception.GeneralException;
 import com.example.domain.LoginType;
 import com.example.domain.Member;
+import com.example.dto.MemberResponse;
 import com.example.jwt.JwtUtil;
+import com.example.jwt.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,9 +20,10 @@ public class AuthService {
 
     private final JwtUtil jwtUtil;
     private final MemberRepository memberRepository;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
-    public String login(Long socialId, String requestLoginType) {
+    public MemberResponse.loginDto login(Long socialId, String requestLoginType) {
         LoginType loginType = null;
 
         if (requestLoginType.equals(LoginType.KAKAO.toString())) {
@@ -34,6 +37,12 @@ public class AuthService {
         Member member = memberRepository.findBySocialIdAndLoginType(socialId, loginType).orElseThrow(() -> new GeneralException(ErrorStatus.MEMBER_NOT_FOUND));
 
         String accessToken = jwtUtil.createAccessToken(member.getId(), member.getSocialId(), member.getRoleType());
-        return accessToken;
+        String refreshToken = refreshTokenService.generateRefreshToken(member.getSocialId(), member.getLoginType());
+
+        return MemberResponse.loginDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .accessTokenExpiresIn(jwtUtil.getTokenExpirationTime(accessToken))
+                .build();
     }
 }

@@ -22,6 +22,8 @@ public enum ErrorStatus implements BaseErrorCode {
     EXPIRED_JWT_EXCEPTION(HttpStatus.UNAUTHORIZED, "AUTH004", "기존 토큰이 만료되었습니다. 토큰을 재발급해주세요."),
     RELOGIN_EXCEPTION(HttpStatus.UNAUTHORIZED, "AUTH005", "모든 토큰이 만료되었습니다. 다시 로그인해주세요."),
     INVALID_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, "AUTH006", "토큰이 올바르지 않습니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "AUTH007", "리프레쉬 토큰이 유효하지 않습니다. 다시 로그인 해주세요"),
+
 
     // 회원 관련 에러
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_001", "사용자가 없습니다"),

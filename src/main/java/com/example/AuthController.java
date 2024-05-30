@@ -21,28 +21,17 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
-    public ApiResponse<MemberResponse.JwtDto> login(@RequestBody MemberRequest.loginRequest request) {
-        String jwtToken = authService.login(request.getId(), request.getLoginType());
+    public ApiResponse<MemberResponse.loginDto> login(@RequestBody MemberRequest.loginRequest request) {
 
-        MemberResponse.JwtDto jwtDto = MemberResponse.JwtDto.builder()
-                .accessToken(jwtToken)
-                .accessTokenExpiresIn(jwtUtil.getTokenExpirationTime(jwtToken))
-                .build();
-
-        return ApiResponse.onSuccess(jwtDto);
+        return ApiResponse.onSuccess(authService.login(request.getId(), request.getLoginType()));
     }
 
     @PostMapping("/signin/{loginType}")
-    public ApiResponse<MemberResponse.JwtDto> signin(@RequestBody MemberRequest.signinRequest request,
-                                                     @PathVariable(name = "loginType") String loginType
+    public ApiResponse<MemberResponse.loginDto> signin(@RequestBody MemberRequest.signinRequest request,
+                                                       @PathVariable(name = "loginType") String loginType
     ) {
 
         Member member = memberService.join(request, loginType);
-        String jwtToken = authService.login(member.getSocialId(), member.getLoginType().toString());
-        MemberResponse.JwtDto jwtDto = MemberResponse.JwtDto.builder()
-                .accessToken(jwtToken)
-                .accessTokenExpiresIn(jwtUtil.getTokenExpirationTime(jwtToken))
-                .build();
-        return ApiResponse.of(SuccessStatus.JOIN_SUCCESS, jwtDto);
+        return ApiResponse.of(SuccessStatus.JOIN_SUCCESS, authService.login(member.getSocialId(), member.getLoginType().toString()));
     }
 }

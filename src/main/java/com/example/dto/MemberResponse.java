@@ -14,7 +14,7 @@ public class MemberResponse {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class JwtDto {
+    public static class loginDto {
         String accessToken;
         String refreshToken;
 
